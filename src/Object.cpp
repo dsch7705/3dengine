@@ -17,17 +17,16 @@ Object::~Object()
 {
 }
 
-Object* Object::Instantiate(Object& base, glm::vec3 position)
+Object* Object::Instantiate(Object* base, glm::vec3 position)
 {
-	Object* obj = new Object(base.VertexArrayObject, base.VertexBufferObject);
+	Object* obj = new Object(base->VertexArrayObject, base->VertexBufferObject);
 	obj->position = position;
-	obj->NumVertices = base.NumVertices;
-	obj->SetShader(base.GetShader());
+	obj->NumVertices = base->NumVertices;
 
-	obj->materialAmbient = glm::vec3(base.materialAmbient);
-	obj->materialDiffuse = glm::vec3(base.materialDiffuse);
-	obj->materialSpecular = base.materialSpecular;
-	obj->materialShininess = base.materialShininess;
+	obj->materialAmbient = glm::vec3(base->materialAmbient);
+	obj->materialDiffuse = glm::vec3(base->materialDiffuse);
+	obj->materialSpecular = base->materialSpecular;
+	obj->materialShininess = base->materialShininess;
 
 	return obj;
 }
@@ -54,14 +53,4 @@ void Object::LoadVertexData(VertexData& data)
 void Object::UseVertexArray()
 {
 	glBindVertexArray(VertexArrayObject);
-}
-
-void Object::SetShader(Shader& shader)
-{
-	m_shader = shader;
-}
-
-Shader& Object::GetShader()
-{
-	return m_shader;
 }

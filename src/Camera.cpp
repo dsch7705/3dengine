@@ -9,17 +9,20 @@ Camera::Camera()
 	Yaw = -90.0f;
 	Pitch = 0.0f;
 
-	InputManager::RegisterAxis("CamMoveX", GLFW_GAMEPAD_AXIS_LEFT_X);
+	InputManager::RegisterAxis("CamMoveX", GLFW_GAMEPAD_AXIS_LEFT_X, GLFW_KEY_D, GLFW_KEY_A);
 	InputManager::SetAxisDeadzone("CamMoveX", 0.15f);
-	InputManager::RegisterAxis("CamMoveZ", GLFW_GAMEPAD_AXIS_LEFT_Y, true);
+	InputManager::RegisterAxis("CamMoveZ", GLFW_GAMEPAD_AXIS_LEFT_Y, GLFW_KEY_S, GLFW_KEY_W, true);
 	InputManager::SetAxisDeadzone("CamMoveZ", 0.15f);
 
-	InputManager::RegisterAxis("CamLookX", GLFW_GAMEPAD_AXIS_RIGHT_X);
+	InputManager::RegisterAxis("CamLookX", GLFW_GAMEPAD_AXIS_RIGHT_X, GLFW_KEY_RIGHT, GLFW_KEY_LEFT);
 	InputManager::SetAxisDeadzone("CamLookX", 0.1f);
-	InputManager::RegisterAxis("CamLookY", GLFW_GAMEPAD_AXIS_RIGHT_Y, true);
+	InputManager::RegisterAxis("CamLookY", GLFW_GAMEPAD_AXIS_RIGHT_Y, GLFW_KEY_DOWN, GLFW_KEY_UP, true);
 
 	InputManager::RegisterButton("CamUp", GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER);
 	InputManager::RegisterButton("CamDown", GLFW_GAMEPAD_BUTTON_LEFT_BUMPER);
+
+	InputManager::RegisterButton("CamUpKey", GLFW_KEY_E);
+	InputManager::RegisterButton("CamDownKey", GLFW_KEY_Q);
 
 	updateCameraVectors();
 }
@@ -72,9 +75,9 @@ void Camera::ProcessGamepadInput(float deltaTime)
 	Position += Front * InputManager::GetAxis("CamMoveZ") * velocity;
 	Position += Right * InputManager::GetAxis("CamMoveX") * velocity;
 	
-	if (InputManager::GetButton("CamUp") == ButtonState::HELD)
+	if (InputManager::GetButton("CamUp") == ButtonState::HELD || InputManager::GetButton("CamUpKey") == ButtonState::HELD)
 		Position += worldUp * velocity;
-	if (InputManager::GetButton("CamDown") == ButtonState::HELD)
+	if (InputManager::GetButton("CamDown") == ButtonState::HELD || InputManager::GetButton("CamDownKey") == ButtonState::HELD)
 		Position -= worldUp * velocity;
 
 	// Look

@@ -3,11 +3,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
 #include <vector>
 
 #include "Shader.h"
-#include "ObjectManager.h"
+
 
 struct VertexData {
 	std::vector<float> data;
@@ -37,12 +36,10 @@ public:
 	Object(unsigned int vao, unsigned int vbo);
 	~Object();
 
-	static Object* Instantiate(Object& base, glm::vec3 position);
+	static Object* Instantiate(Object* base, glm::vec3 position);
 
 	void LoadVertexData(VertexData& data);
 	void UseVertexArray();
-	void SetShader(Shader& shader);
-	Shader& GetShader();
 
 public:
 	unsigned int VertexArrayObject;
@@ -57,16 +54,4 @@ public:
 	float	  materialShininess = 290.0f;
 
 	unsigned int id;
-
-private:
-	Object(unsigned int vao, unsigned int vbo);
-
-private:
-
-	Shader m_shader;
-};
-
-class Box : Object
-{
-
 };

@@ -91,7 +91,8 @@ public:
 	static void Init(GLFWwindow* window);
 
 	static void RegisterAxis(const std::string& axisName, int axisId, bool inv = false);
-	static void RegisterAxis(const std::string& axisName, int pId, int nId);
+	static void RegisterAxis(const std::string& axisName, int pId, int nId, bool inv = false);
+	static void RegisterAxis(const std::string& axisName, int axisId, int pId, int nId, bool inv = false);
 	static float GetAxis(const std::string& axisName);
 	static void SetAxisDeadzone(const std::string& axisName, float deadzone);
 

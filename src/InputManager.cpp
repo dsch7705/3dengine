@@ -24,8 +24,15 @@ std::map<std::string, ButtonData> InputManager::m_buttonMap;
 
 void InputManager::RegisterAxis(const std::string& axisName, int axisOffset, bool inv)
 {
-	m_axisMap[axisName] = AxisData(axisOffset);
-	m_axisMap[axisName].invert = inv;
+	m_axisMap[axisName] = AxisData(axisOffset, inv);
+}
+void InputManager::RegisterAxis(const std::string& axisName, int pId, int nId, bool inv)
+{
+	m_axisMap[axisName] = AxisData(pId, nId, inv);
+}
+void InputManager::RegisterAxis(const std::string& axisName, int axisId, int pId, int nId, bool inv)
+{
+	m_axisMap[axisName] = AxisData(axisId, pId, nId, inv);
 }
 
 float InputManager::GetAxis(const std::string& axisName)
@@ -73,14 +80,26 @@ void InputManager::Poll()
 			const float* axes = glfwGetJoystickAxes(m_joystickId, &n);
 			axisData.value = axes[axisData.axisOffset];
 		}
+
+		if (axisData.axisOffset != -1 && axisData.positiveButtonId != -1 && axisData.negativeButtonId != -1)
+		{
+			if (m_joystickId == -1)
+				axisData.value = (float)glfwGetKey(m_window, axisData.positiveButtonId) - (float)glfwGetKey(m_window, axisData.negativeButtonId);
+
+			else
+			{
+				int n;
+				const float* axes = glfwGetJoystickAxes(m_joystickId, &n);
+				axisData.value = axes[axisData.axisOffset];
+			}
+		}
 	}
 
 	// Buttons
 	for (auto& [buttonKey, buttonData] : m_buttonMap)
 	{
 		int keyState;
-		bool isGamepadButton = (buttonData.buttonId >= 0 && buttonData.buttonId <= GLFW_GAMEPAD_BUTTON_LAST) ? true : false;
-		if (isGamepadButton)
+		if (m_joystickId != -1)
 		{
 			int n;
 			keyState = glfwGetJoystickButtons(m_joystickId, &n)[buttonData.buttonId];

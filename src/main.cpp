@@ -10,12 +10,13 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
+#include "Scene.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "Camera.h"
 #include "Object.h"
 #include "InputManager.h"
-#include "ObjectManager.h"
+#include "Editor.h"
 
 const bool fullscreen = false;
 const unsigned int NUM_VAOS = 2;
@@ -69,7 +70,6 @@ std::vector<float> boxVertices = {
 	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
-
 glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
 	glm::vec3(2.0f,  5.0f, -15.0f),
@@ -83,15 +83,7 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
-Shader shader1, shader2, shaderCube, shaderLighting, shaderLightCube;
-Texture texture1, texture2;
-Camera cam;
-ObjectManager objManager;
-Object object;
-
-unsigned int VAOs[NUM_VBOS];	// Vertex array object
-unsigned int VBOs[NUM_VBOS];	// Vertex buffer object
-unsigned int ebo;	// Element buffer object
+Scene* mainScene;
 
 // misc
 float deltaTime = 0.0f;
@@ -115,6 +107,8 @@ void imguiDraw()
 	// draw
 	ImGui::NewFrame();
 
+	Editor::Draw();
+	/*
 	ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
 	float imWindowWidth = 400.0f;
 	float imWindowHeight = 200.0f;
@@ -124,7 +118,7 @@ void imguiDraw()
 	ImGui::Begin("Test");
 	ImGui::ColorEdit4("Sky Color ", glm::value_ptr(skyColor));
 	ImGui::NewLine();
-	ImGui::SliderFloat3("Box Scale ", glm::value_ptr(object.scale), 0.0f, 100.0f);
+	//ImGui::SliderFloat3("Box Scale ", glm::value_ptr(object.scale), 0.0f, 100.0f);
 	ImGui::NewLine();
 	ImGui::Checkbox("Wireframe ", &wireframe);
 	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
@@ -165,7 +159,7 @@ void imguiDraw()
 			}
 			ImGui::PopID();
 			i++;
-		}
+		}*
 		ImGui::Unindent();
 	}
 	ImGui::End();
@@ -181,10 +175,10 @@ void imguiDraw()
 	ImGui::SliderFloat("Light Orbit Radius ", &lightOrbitRadius, 0.0f, 100.0f);
 	ImGui::SliderFloat("Light Orbit Velocity ", &lightOrbitVelocity, 0.0f, 50.0f);
 	ImGui::End();
+	*/
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 }
 void imguiClean()
 {
@@ -199,6 +193,7 @@ void draw()
 	glClearColor(skyColor.r, skyColor.g, skyColor.b, skyColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	/*
 	// Light
 	glm::vec3 lightPos(cos(glfwGetTime() * lightOrbitVelocity) * lightOrbitRadius, lightY, sin(glfwGetTime() * lightOrbitVelocity) * lightOrbitRadius);
 
@@ -260,7 +255,8 @@ void draw()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 	*/
-
+	
+	mainScene->Update(deltaTime);
 	imguiDraw();
 
 	glfwSwapBuffers(window);
@@ -340,57 +336,57 @@ int glSetup()
 	// OpenGL
 
 	// Shader loading
-	shader1 = Shader("res/shaders/basic.shader");
-	shader2 = Shader("res/shaders/basic2.shader");
-	shaderCube = Shader("res/shaders/Cube.shader");
-	shaderLighting = Shader("res/shaders/Lighting.shader");
-	shaderLightCube = Shader("res/shaders/LightCube.shader");
+	//shader1 = Shader("res/shaders/basic.shader");
+	//shader2 = Shader("res/shaders/basic2.shader");
+	//shaderCube = Shader("res/shaders/Cube.shader");
+	//shaderLighting = Shader("res/shaders/Lighting.shader");
+	//shaderLightCube = Shader("res/shaders/LightCube.shader");
 
 	// Texture loading
-	texture1 = Texture("res/textures/container.jpg", GL_LINEAR);
-	texture2 = Texture("res/textures/cobble.png", GL_NEAREST);
+	//texture1 = Texture("res/textures/container.jpg", GL_LINEAR);
+	//texture2 = Texture("res/textures/cobble.png", GL_NEAREST);
 	
-	texture1.SetTextureUnit(GL_TEXTURE0);
-	texture2.SetTextureUnit(GL_TEXTURE1);
+	//texture1.SetTextureUnit(GL_TEXTURE0);
+	//texture2.SetTextureUnit(GL_TEXTURE1);
 
-	shader2.setInt("texture1", 0);
-	shader2.setInt("texture2", 1);
+	//shader2.setInt("texture1", 0);
+	//shader2.setInt("texture2", 1);
 
-	shaderCube.setInt("texture1", 0);
-	shaderCube.setInt("texture2", 1);
+	//shaderCube.setInt("texture1", 0);
+	//shaderCube.setInt("texture2", 1);
 
 	// Vertex array objects
-	glGenVertexArrays(NUM_VAOS, VAOs);
+	//glGenVertexArrays(NUM_VAOS, VAOs);
 
 	// Vertex buffer objects
-	glGenBuffers(NUM_VBOS, VBOs);
+	//glGenBuffers(NUM_VBOS, VBOs);
 
 	// Load vertex data and configure vertex attributes
 
 	// Box
-	glBindVertexArray(VAOs[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * boxVertices.size(), &boxVertices.front(), GL_STATIC_DRAW);
+	//glBindVertexArray(VAOs[0]);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * boxVertices.size(), &boxVertices.front(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	//glEnableVertexAttribArray(1);
 
 	// Light
-	glBindVertexArray(VAOs[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // using the same vertex data as cube
+	//glBindVertexArray(VAOs[1]);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // using the same vertex data as cube
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	//glEnableVertexAttribArray(0);
 
 	// Objects
-	VertexData boxData(boxVertices, { 3, 3 });
-	object.LoadVertexData(boxData);
-	object.scale = glm::vec3(20.0f, 0.1f, 20.0f);
+	//VertexData boxData(boxVertices, { 3, 3 });
+	//object.LoadVertexData(boxData);
+	//object.scale = glm::vec3(20.0f, 0.1f, 20.0f);
 
 	// Misc
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_DEPTH_TEST);
 	//glDisable(GL_CULL_FACE);
 
@@ -414,6 +410,11 @@ int main(int argc, char* args[])
 	//std::cout << boxVertices << std::endl;
 	glSetup();
 	imguiSetup();
+	mainScene = new TestScene;
+	mainScene->Setup();
+
+	Editor::setCurrentScene(mainScene);
+
 	float lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window))
 	{
@@ -421,9 +422,8 @@ int main(int argc, char* args[])
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		cam.ProcessGamepadInput(deltaTime);
-		InputManager::Poll();
 		draw();
+		InputManager::Poll();
 	}
 
 	imguiClean();
