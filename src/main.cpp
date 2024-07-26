@@ -17,6 +17,8 @@
 #include "Object.h"
 #include "InputManager.h"
 #include "Editor.h"
+#include "FileLoader.h"
+#include "Material.h"
 
 const bool fullscreen = false;
 const unsigned int NUM_VAOS = 2;
@@ -70,6 +72,51 @@ std::vector<float> boxVertices = {
 	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
+std::vector<float> crateVerticies = {
+	// positions          // normals           // texture coords
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+};
+
 glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
 	glm::vec3(2.0f,  5.0f, -15.0f),
@@ -85,11 +132,12 @@ glm::vec3 cubePositions[] = {
 
 Scene* mainScene;
 
+double mouseX, mouseY;
 // misc
 float deltaTime = 0.0f;
 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
-glm::vec4 skyColor(0.0f, 0.85f, 1.0f, 1.0f);
+glm::vec4 skyColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 glm::vec3 lightAmbient(141.0f / 255.0f, 141.0f / 255.0f, 141.0f / 255.0f);
 glm::vec3 lightDiffuse(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f);
@@ -107,7 +155,7 @@ void imguiDraw()
 	// draw
 	ImGui::NewFrame();
 
-	Editor::Draw();
+	Editor::Draw(deltaTime);
 	/*
 	ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
 	float imWindowWidth = 400.0f;
@@ -191,7 +239,7 @@ void draw()
 {
 	// Clear screen
 	glClearColor(skyColor.r, skyColor.g, skyColor.b, skyColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	/*
 	// Light
@@ -265,8 +313,22 @@ void draw()
 
 #pragma region Callbacks
 
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+	{
+		float idx;
+		//glBindFramebuffer(GL_FRAMEBUFFER, Editor::pickObjFramebuffer);
+		glReadPixels(mouseX, windowHeight - mouseY - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &idx);
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		std::cout << idx << std::endl;
+	}
+}
+
 void cursor_pos_callback(GLFWwindow* window, double x, double y)
 {
+	mouseX = x;
+	mouseY = y;
 }
 
 void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -276,6 +338,12 @@ void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 {
+	Editor::windowWidth = w;
+	Editor::windowHeight = h;
+
+	Editor::currentScene->UpdateProjectionMatrix(glm::radians(45.0f), (float)w / (float)h);
+
+	glViewport(0, 0, w, h);
 	draw();
 }
 
@@ -327,72 +395,23 @@ int glSetup()
 		return -1;
 	}
 
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 	glfwSetScrollCallback(window, mouse_scroll_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	glViewport(0, 0, windowWidth, windowHeight);
 
-	// OpenGL
-
-	// Shader loading
-	//shader1 = Shader("res/shaders/basic.shader");
-	//shader2 = Shader("res/shaders/basic2.shader");
-	//shaderCube = Shader("res/shaders/Cube.shader");
-	//shaderLighting = Shader("res/shaders/Lighting.shader");
-	//shaderLightCube = Shader("res/shaders/LightCube.shader");
-
-	// Texture loading
-	//texture1 = Texture("res/textures/container.jpg", GL_LINEAR);
-	//texture2 = Texture("res/textures/cobble.png", GL_NEAREST);
-	
-	//texture1.SetTextureUnit(GL_TEXTURE0);
-	//texture2.SetTextureUnit(GL_TEXTURE1);
-
-	//shader2.setInt("texture1", 0);
-	//shader2.setInt("texture2", 1);
-
-	//shaderCube.setInt("texture1", 0);
-	//shaderCube.setInt("texture2", 1);
-
-	// Vertex array objects
-	//glGenVertexArrays(NUM_VAOS, VAOs);
-
-	// Vertex buffer objects
-	//glGenBuffers(NUM_VBOS, VBOs);
-
-	// Load vertex data and configure vertex attributes
-
-	// Box
-	//glBindVertexArray(VAOs[0]);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * boxVertices.size(), &boxVertices.front(), GL_STATIC_DRAW);
-
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	//glEnableVertexAttribArray(1);
-
-	// Light
-	//glBindVertexArray(VAOs[1]);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // using the same vertex data as cube
-
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	//glEnableVertexAttribArray(0);
-
-	// Objects
-	//VertexData boxData(boxVertices, { 3, 3 });
-	//object.LoadVertexData(boxData);
-	//object.scale = glm::vec3(20.0f, 0.1f, 20.0f);
-
 	// Misc
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+	
 	//glDisable(GL_CULL_FACE);
 
 	InputManager::Init(window);
 }
-
 void imguiSetup()
 {
 	IMGUI_CHECKVERSION();
@@ -404,12 +423,27 @@ void imguiSetup()
 	ImGui_ImplOpenGL3_Init("#version 460");
 }
 
+void setupDefaults()
+{
+	Texture::GenerateDefaultTexture();
+	Material::defaultMaterial = new Material(Texture::defaultTexture, Texture::defaultTexture, 32.0f);
+	Material::defaultMaterial->name = "default";
+	Mesh::defaultMesh = new Mesh(crateVerticies, { 3, 3, 2 });
+	Object::defaultObject = new Object(Mesh::defaultMesh, Material::defaultMaterial, glm::vec3(0.0f));
+
+	Editor::pickObjShader = new Shader("res/shaders/pick.shader");
+	Editor::genPickFramebuffer();
+	
+	FileLoader::LoadTexturesFromDirectory("res/textures");
+}
+
 int main(int argc, char* args[])
 {
-	//VertexData(boxVertices, { 3, 3 });
-	//std::cout << boxVertices << std::endl;
 	glSetup();
 	imguiSetup();
+
+	setupDefaults();
+
 	mainScene = new TestScene;
 	mainScene->Setup();
 
@@ -428,5 +462,6 @@ int main(int argc, char* args[])
 
 	imguiClean();
 	glfwTerminate();
+	glfwDestroyWindow(window);
 	return 0;
 }

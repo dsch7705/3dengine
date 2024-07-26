@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "Object.h"
 
-class Light : public Object
+class Light
 {
 public:
 	Light(glm::vec3 scale, unsigned int vao, unsigned int vbo, 

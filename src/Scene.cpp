@@ -7,9 +7,11 @@ Scene::Scene()
 
 	m_lightingShader = new Shader("res/shaders/Lighting.shader");
 	m_lightSourceShader = new Shader("res/shaders/LightCube.shader");
+	m_outlineShader = new Shader("res/shaders/outline.shader");
 
 	m_lightingShader->setMat4("projection", projectionMatrix, false);
 	m_lightSourceShader->setMat4("projection", projectionMatrix, false);
+	m_outlineShader->setMat4("projection", projectionMatrix, false);
 }
 Scene::~Scene()
 {
@@ -23,9 +25,11 @@ Scene::~Scene()
 
 void Scene::DrawObjects()
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Draw objects
 	for (const auto& obj : m_objects)
 	{
+		glStencilMask(0x00);
 		// Calculate and set model matrix per object
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, obj->position);
@@ -33,15 +37,46 @@ void Scene::DrawObjects()
 		m_lightingShader->setMat4("model", model, false);
 
 		// Set material attributes
-		m_lightingShader->setVec3("material.ambient", obj->materialAmbient);
-		m_lightingShader->setVec3("material.diffuse", obj->materialDiffuse);
-		m_lightingShader->setVec3("material.specular", obj->materialSpecular);
-		m_lightingShader->setFloat("material.shininess", obj->materialShininess);
+		obj->mat->diffuseMap->SetTextureUnit(GL_TEXTURE0);
+		obj->mat->specularMap->SetTextureUnit(GL_TEXTURE1);
+		m_lightingShader->setInt("material.diffuse", 0);
+		m_lightingShader->setInt("material.specular", 1);
+
+		m_lightingShader->setFloat("material.shininess", obj->mat->shininess);
+		m_lightingShader->setVec3("material.tintColor", obj->mat->tint);
 
 		// Draw
 		m_lightingShader->use();
-		obj->UseVertexArray();
-		glDrawArrays(GL_TRIANGLES, 0, obj->NumVertices);
+		obj->mesh->use();
+		if (false)//obj == Editor::selected)
+		{
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+			glDrawArrays(GL_TRIANGLES, 0, obj->mesh->numVertices);
+
+			continue;
+		}
+		glStencilFunc(GL_ALWAYS, &obj - &m_objects[0], 0xFF);
+		glStencilMask(0xFF);
+		glDrawArrays(GL_TRIANGLES, 0, obj->mesh->numVertices);
+	}
+
+	if (false)//Editor::selectedObject != nullptr && Editor::selected == Editor::selectedObject)
+	{
+
+		glDisable(GL_DEPTH_TEST);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, Editor::selectedObject->position);
+		model = glm::scale(model, Editor::selectedObject->scale * 1.1f);
+		m_outlineShader->setMat4("model", model, false);
+		m_outlineShader->use();
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDrawArrays(GL_TRIANGLES, 0, Editor::selectedObject->mesh->numVertices);
+
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+		glStencilMask(0xFF);
+		glEnable(GL_DEPTH_TEST);
 	}
 }
 void Scene::Draw()
@@ -52,22 +87,28 @@ void Scene::Draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// update lighting shader
-	m_lightingShader->setVec3("lightPos", m_lightPosition);
+	m_lightingShader->setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 	m_lightingShader->setVec3("light.ambient", m_lightAmbient);
 	m_lightingShader->setVec3("light.diffuse", m_lightDiffuse);
 	m_lightingShader->setVec3("light.specular", m_lightSpecular);
 
 	DrawObjects();
+	Editor::pickObjectPass();
 
 	// Draw light
-	if (m_objects.empty())
+	if (m_objects.empty() || !drawLight)
 		return;
+
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, m_lightPosition);
+	model = glm::scale(model, glm::vec3(0.2f));
 
 	m_lightSourceShader->use();
 	m_lightSourceShader->setVec3("lightColor", m_lightDiffuse);
+	m_lightSourceShader->setMat4("model", model, false);
 
-	m_objects[0]->UseVertexArray();
-	glDrawArrays(GL_TRIANGLES, 0, m_objects[0]->NumVertices);
+	m_objects[0]->mesh->use();
+	glDrawArrays(GL_TRIANGLES, 0, m_objects[0]->mesh->numVertices);
 }
 
 void Scene::RegisterObject(Object* obj)
@@ -76,6 +117,7 @@ void Scene::RegisterObject(Object* obj)
 		return;
 
 	obj->id = m_objects.size();
+	obj->name = std::string("Object ").append(std::to_string(obj->id));
 	m_objects.push_back(obj);
 }
 void Scene::UpdateCamera(float deltaTime)
@@ -88,4 +130,13 @@ void Scene::UpdateCamera(float deltaTime)
 
 	m_lightSourceShader->setMat4("view", viewMatrix, false);
 
+	m_outlineShader->setMat4("view", viewMatrix, false);
+}
+void Scene::UpdateProjectionMatrix(float fov, float aspectRatio)
+{
+	projectionMatrix = glm::perspective(fov, aspectRatio, 0.1f, 500.0f);
+
+	m_lightingShader->setMat4("projection", projectionMatrix, false);
+	m_lightSourceShader->setMat4("projection", projectionMatrix, false);
+	m_outlineShader->setMat4("projection", projectionMatrix, false);
 }
