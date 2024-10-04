@@ -91,6 +91,24 @@ void Camera::ProcessGamepadInput(float deltaTime)
 
 	updateCameraVectors();
 }
+void Camera::SetPosition(glm::vec3 position)
+{
+	Position = position;
+
+	updateCameraVectors();
+}
+void Camera::SetRotation(float pitch, float yaw)
+{
+	Pitch = pitch;
+	Yaw = yaw;
+
+	if (Pitch > 89.0f)
+		Pitch = 89.0f;
+	if (Pitch < -89.0f)
+		Pitch = -89.0f;
+
+	updateCameraVectors();
+}
 
 glm::mat4 Camera::GetViewMatrix()
 {

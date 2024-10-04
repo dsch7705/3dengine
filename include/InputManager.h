@@ -99,7 +99,9 @@ public:
 	static void RegisterButton(const std::string& buttonName, int buttonId);
 	static ButtonState GetButton(const std::string& buttonName);
 
-	// UseJoystick(int id);
+	static void MousePosCallback(GLFWwindow* window, double x, double y);
+	static inline double mouseX = 0.0f;
+	static inline double mouseY = 0.0f;
 
 	static void Poll();
 

@@ -17,9 +17,11 @@ void main()
 
 uniform int objId;
 
-out vec4 fragColor;
+out uvec3 fragColor;
+//out vec4 fragColor;
 
 void main()
 {
-	fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+	fragColor = uvec3(objId + 1, 255, 0);
+	//fragColor = vec4(0.0, 1.0, 0.0, 1.0);
 }

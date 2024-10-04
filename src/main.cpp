@@ -17,8 +17,9 @@
 #include "Object.h"
 #include "InputManager.h"
 #include "Editor.h"
-#include "FileLoader.h"
+#include "FileIO.h"
 #include "Material.h"
+#include "Renderer.h"
 
 const bool fullscreen = false;
 const unsigned int NUM_VAOS = 2;
@@ -26,7 +27,7 @@ const unsigned int NUM_VBOS = 1;
 
 int windowWidth = 1280;
 int windowHeight = 720;
-const char* windowTitle = "Minecraft Clone";
+const char* windowTitle = "3D Engine";
 
 GLFWwindow* window;
 std::vector<float> boxVertices = {
@@ -156,74 +157,6 @@ void imguiDraw()
 	ImGui::NewFrame();
 
 	Editor::Draw(deltaTime);
-	/*
-	ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
-	float imWindowWidth = 400.0f;
-	float imWindowHeight = 200.0f;
-
-	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Appearing);
-	ImGui::SetNextWindowSize(ImVec2(imWindowWidth, imWindowHeight), ImGuiCond_Appearing);
-	ImGui::Begin("Test");
-	ImGui::ColorEdit4("Sky Color ", glm::value_ptr(skyColor));
-	ImGui::NewLine();
-	//ImGui::SliderFloat3("Box Scale ", glm::value_ptr(object.scale), 0.0f, 100.0f);
-	ImGui::NewLine();
-	ImGui::Checkbox("Wireframe ", &wireframe);
-	glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-	ImGui::End();
-
-	ImGui::SetNextWindowPos(ImVec2(viewportSize.x - imWindowWidth, 0.0f), ImGuiCond_Appearing);
-	ImGui::SetNextWindowSize(ImVec2(imWindowWidth, imWindowHeight), ImGuiCond_Appearing);
-	ImGui::Begin("Material Properties");
-	
-	//ImGui::ColorEdit3("Material Ambient ", glm::value_ptr(materialAmbient));
-	//ImGui::ColorEdit3("Material Diffuse ", glm::value_ptr(materialDiffuse));
-	//ImGui::ColorEdit3("Material Specular ", glm::value_ptr(materialSpecular));
-	//ImGui::SliderFloat("Material Shininess ", &materialShininess, 1.0f, 1024.0f);
-	if (ImGui::CollapsingHeader("Objects"))
-	{
-		ImGui::Indent(5.0f);
-		int i = 0;
-		for (auto& obj : objManager.objects)
-		{
-			ImGui::PushID(obj);
-			std::string objName = "Object ";
-			objName.append(std::to_string(obj->id));
-			if (ImGui::TreeNode(objName.c_str()))
-			{
-				std::string mName = "Properties ";
-				mName.append(std::to_string(obj->id));
-				if (ImGui::TreeNode(mName.c_str()))
-				{
-					ImGui::ColorEdit3("Material Ambient ", glm::value_ptr(obj->materialAmbient));
-					ImGui::ColorEdit3("Material Diffuse ", glm::value_ptr(obj->materialDiffuse));
-					ImGui::ColorEdit3("Material Specular ", glm::value_ptr(obj->materialSpecular));
-					ImGui::SliderFloat("Material Shininess ", &obj->materialShininess, 1.0f, 1024.0f);
-
-					ImGui::TreePop();
-				}
-
-				ImGui::TreePop();
-			}
-			ImGui::PopID();
-			i++;
-		}*
-		ImGui::Unindent();
-	}
-	ImGui::End();
-
-	ImGui::SetNextWindowPos(ImVec2(viewportSize.x - imWindowWidth, imWindowHeight), ImGuiCond_Appearing);
-	ImGui::SetNextWindowSize(ImVec2(imWindowWidth, imWindowHeight), ImGuiCond_Appearing);
-	ImGui::Begin("Light Properties");
-
-	ImGui::ColorEdit3("Light Ambient ", glm::value_ptr(lightAmbient));
-	ImGui::ColorEdit3("Light Diffuse ", glm::value_ptr(lightDiffuse));
-	ImGui::ColorEdit3("Light Specular ", glm::value_ptr(lightSpecular));
-	ImGui::SliderFloat("Light Y ", &lightY, 2.0f, 50.0f);
-	ImGui::SliderFloat("Light Orbit Radius ", &lightOrbitRadius, 0.0f, 100.0f);
-	ImGui::SliderFloat("Light Orbit Velocity ", &lightOrbitVelocity, 0.0f, 50.0f);
-	ImGui::End();
-	*/
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -240,71 +173,13 @@ void draw()
 	// Clear screen
 	glClearColor(skyColor.r, skyColor.g, skyColor.b, skyColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-	/*
-	// Light
-	glm::vec3 lightPos(cos(glfwGetTime() * lightOrbitVelocity) * lightOrbitRadius, lightY, sin(glfwGetTime() * lightOrbitVelocity) * lightOrbitRadius);
-
-	shaderLightCube.use();
-	object.UseVertexArray();
-	//glBindVertexArray(VAOs[1]);
-
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, lightPos);
-	model = glm::scale(model, glm::vec3(0.2f));
-	glm::mat4 view = cam.GetViewMatrix();
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.1f, 500.0f);
-
-	shaderLightCube.setMat4("model", model, false);
-	shaderLightCube.setMat4("view", view, false);
-	shaderLightCube.setMat4("projection", projection, false);
-
-	shaderLightCube.setVec3("lightColor", lightColor);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	// Box
-	//shaderLighting.setMat4("view", view, false);
-	//shaderLighting.setMat4("projection", projection, false);
-	//shaderLighting.setVec3("objectColor", objectColor);
-	//shaderLighting.setVec3("lightColor", lightColor);
-	shaderLighting.setVec3("lightPos", lightPos);
-	shaderLighting.setVec3("viewPos", cam.Position);
-
-	//shaderLighting.setVec3("material.ambient", materialAmbient);
-	//shaderLighting.setVec3("material.diffuse", materialDiffuse);
-	//shaderLighting.setVec3("material.specular", materialSpecular);
-	//shaderLighting.setFloat("material.shininess", materialShininess);
-
-	shaderLighting.setVec3("light.ambient", lightAmbient);
-	shaderLighting.setVec3("light.diffuse", lightDiffuse);
-	shaderLighting.setVec3("light.specular", lightSpecular);
-
-	objManager.lightingShader = &shaderLighting;
-	objManager.Draw(view, projection);
-	/*
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, object.position);
-	shaderLighting.setMat4("model", model, false);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
-	Object obj2 = Object::Instantiate(object, glm::vec3(2.0f, 0.0f, 0.0f));
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, obj2.position);
-	shaderLighting.setMat4("model", model, false);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	/*
-	for (unsigned int i = 0; i < 10; i++)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, cubePositions[i]);
-		//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(150.0f + i*5), glm::vec3(0.5f, 1.0f, 0.0f));
-
-		shaderLighting.setMat4("model", model, false);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
-	*/
 	
-	mainScene->Update(deltaTime);
+	//mainScene->Update(deltaTime);
+	Editor::currentScene->deltaTime = deltaTime;
+	Renderer::RenderScene(Editor::currentScene);
+	Renderer::RenderPickObject(Editor::currentScene);
+	Renderer::RenderDebug(Editor::currentScene);
+	//Editor::pickObjectPass();
 	imguiDraw();
 
 	glfwSwapBuffers(window);
@@ -315,13 +190,23 @@ void draw()
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+	if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS && !ImGui::GetIO().WantCaptureMouse)
 	{
-		float idx;
-		//glBindFramebuffer(GL_FRAMEBUFFER, Editor::pickObjFramebuffer);
-		glReadPixels(mouseX, windowHeight - mouseY - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &idx);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		std::cout << idx << std::endl;
+		unsigned int col[3];
+		glBindFramebuffer(GL_FRAMEBUFFER, Renderer::m_pickObjectFBO);
+		glReadPixels(mouseX, windowHeight - mouseY - 1, 1, 1, GL_RGB_INTEGER, GL_UNSIGNED_INT, col);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
+		std::cout << "R: " << col[0] << " G: " << col[1] << " B: " << col[2] << std::endl;
+		if (col[0] != 0)
+		{
+			Editor::selectedObject = Editor::currentScene->m_objects[col[0]-1];
+			Editor::selected = Editor::selectedObject;
+		}
+		else
+		{
+			Editor::selected = nullptr;
+		}
 	}
 }
 
@@ -338,10 +223,7 @@ void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 {
-	Editor::windowWidth = w;
-	Editor::windowHeight = h;
-
-	Editor::currentScene->UpdateProjectionMatrix(glm::radians(45.0f), (float)w / (float)h);
+	Renderer::FramebufferCallback(window, w, h);
 
 	glViewport(0, 0, w, h);
 	draw();
@@ -395,8 +277,8 @@ int glSetup()
 		return -1;
 	}
 
-	glfwSetMouseButtonCallback(window, mouse_button_callback);
-	glfwSetCursorPosCallback(window, cursor_pos_callback);
+	glfwSetMouseButtonCallback(window, Editor::MouseClickCallback);
+	glfwSetCursorPosCallback(window, InputManager::MousePosCallback);
 	glfwSetScrollCallback(window, mouse_scroll_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -426,15 +308,14 @@ void imguiSetup()
 void setupDefaults()
 {
 	Texture::GenerateDefaultTexture();
-	Material::defaultMaterial = new Material(Texture::defaultTexture, Texture::defaultTexture, 32.0f);
-	Material::defaultMaterial->name = "default";
+	Material::GenerateDefaultMaterial();
+
 	Mesh::defaultMesh = new Mesh(crateVerticies, { 3, 3, 2 });
 	Object::defaultObject = new Object(Mesh::defaultMesh, Material::defaultMaterial, glm::vec3(0.0f));
 
 	Editor::pickObjShader = new Shader("res/shaders/pick.shader");
-	Editor::genPickFramebuffer();
 	
-	FileLoader::LoadTexturesFromDirectory("res/textures");
+	FileIO::LoadTexturesFromDirectory("res/textures");
 }
 
 int main(int argc, char* args[])
@@ -444,8 +325,14 @@ int main(int argc, char* args[])
 
 	setupDefaults();
 
+	Renderer::Setup(windowWidth, windowHeight);
+	Editor::Setup();
+
 	mainScene = new TestScene;
 	mainScene->Setup();
+	Renderer::SetCurrentScene(mainScene);
+
+	mainScene->m_pointLights.push_back(PointLight());
 
 	Editor::setCurrentScene(mainScene);
 
@@ -456,7 +343,10 @@ int main(int argc, char* args[])
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
+
 		draw();
+		//Editor::pickObjectPass();
+		Editor::currentScene->m_mainCamera->ProcessGamepadInput(deltaTime);
 		InputManager::Poll();
 	}
 

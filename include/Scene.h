@@ -9,14 +9,30 @@
 #include <vector>
 
 
+struct DirectionalLight
+{
+	glm::vec3 eulerAngles = glm::vec3(19.0f, 0.0f, 30.0f);
+
+	glm::vec3 ambient = glm::vec3(141.0f / 255.0f, 141.0f / 255.0f, 141.0f / 255.0f);
+	glm::vec3 diffuse = glm::vec3(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f);
+	glm::vec3 specular = glm::vec3(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+};
+struct PointLight
+{
+	glm::vec3 position = glm::vec3(0.0f);
+	float radius = 10.0f;
+
+	glm::vec3 ambient = glm::vec3(141.0f / 255.0f, 141.0f / 255.0f, 141.0f / 255.0f);
+	glm::vec3 diffuse = glm::vec3(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f);
+	glm::vec3 specular = glm::vec3(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+};
+
 class Editor;
 class Scene
 {
 public:
 	Scene();
 	~Scene();
-
-	void Draw();
 
 	virtual void Setup() {};
 	virtual void Update(float deltaTime) {};
@@ -27,18 +43,17 @@ public:
 	void UpdateProjectionMatrix(float fov, float aspectRatio);
 
 public:
+	float deltaTime;
+
 	Camera* m_mainCamera;
 	Shader* m_lightingShader;
 	Shader* m_lightSourceShader;
 	Shader* m_outlineShader;
 
 	std::vector<Object*> m_objects;
-	//Object defaultObject;
 
-	glm::vec3 m_lightPosition = glm::vec3(10.0f, 10.0f, 5.0f);
-	glm::vec3 m_lightAmbient = glm::vec3(141.0f / 255.0f, 141.0f / 255.0f, 141.0f / 255.0f);
-	glm::vec3 m_lightDiffuse = glm::vec3(128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f);
-	glm::vec3 m_lightSpecular = glm::vec3(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+	DirectionalLight m_dirLight;
+	std::vector<PointLight> m_pointLights;
 
 	bool wireframe = false;
 	bool drawLight = false;
@@ -76,7 +91,5 @@ public:
 	void Update(float deltaTime) override
 	{
 		UpdateCamera(deltaTime);
-
-		Draw();
 	}
 };

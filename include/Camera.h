@@ -11,6 +11,8 @@ public:
 
 	void ProcessKBMInput(float deltaTime);
 	void ProcessGamepadInput(float deltaTime);
+	void SetPosition(glm::vec3 position);
+	void SetRotation(float pitch, float yaw);
 	glm::mat4 GetViewMatrix();
 
 public:

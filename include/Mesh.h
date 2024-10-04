@@ -1,9 +1,11 @@
 #pragma once
 #include <glad/glad.h>
 #include <vector>
+#include <string>
 
 
 struct Mesh {
+	std::string name;
 	std::vector<float> data;
 
 	std::vector<unsigned int> vertexAttribSizes;

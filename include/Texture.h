@@ -1,10 +1,13 @@
+
 #pragma once
 #include <glad/glad.h>
 #include <stb_image.h>
+#include <iostream>
 #include <string>
-#include "FileLoader.h"
+#include <vector>
+#include <map>
 
-class FileLoader;
+
 class Texture
 {
 public:
@@ -16,6 +19,7 @@ public:
 public:
 	Texture(const std::string& filepath);
 	~Texture();
+	std::string GetKey() { return key; }
 
 	void SetTextureUnit(GLenum unit);
 	static void GenerateDefaultTexture();
@@ -29,8 +33,10 @@ public:
 	unsigned char* data;
 
 	static inline Texture* defaultTexture;
-	static inline std::vector<Texture*> list;
+	static inline std::map<std::string, Texture*> map;
 
 private:
 	Texture();
+
+	std::string key;
 };

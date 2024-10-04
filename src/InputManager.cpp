@@ -12,11 +12,11 @@ void InputManager::Init(GLFWwindow* window)
 		{
 			m_joystickId = i;
 			std::cout << "Using joystick [" << i << "] - " << glfwGetGamepadName(i) << std::endl;
-			break;
+			return;
 		}
-
-		std::cout << "No joystick present" << std::endl;
 	}
+
+	std::cout << "No joystick present" << std::endl;
 }
 
 std::map<std::string, AxisData> InputManager::m_axisMap;
@@ -134,4 +134,10 @@ void InputManager::Poll()
 			}
 		}
 	}
+}
+
+void InputManager::MousePosCallback(GLFWwindow* window, double x, double y)
+{
+	mouseX = x;
+	mouseY = y;
 }

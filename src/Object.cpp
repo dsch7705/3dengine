@@ -10,7 +10,17 @@ Object::~Object()
 {
 }
 
-Object* Object::Instantiate(glm::vec3 position)
+Object* Object::Instantiate(glm::vec3 position, glm::vec3 scale)
 {
-	return new Object(mesh, mat, position);
+	Object* obj = new Object(mesh, mat, position);
+	obj->scale = scale;
+
+	return obj;
+}
+
+void Object::ResetOrientation(float seconds)
+{
+	timeToReset = seconds;
+	currentResetTime = 0.0f;
+	resettingOrientation = true;
 }

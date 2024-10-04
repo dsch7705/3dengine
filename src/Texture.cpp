@@ -21,6 +21,7 @@ Texture::Texture(const std::string& filepath)
 	}
 
 	filename = name;
+	key = filename;
 	data = stbi_load(filepath.c_str(), &width, &height, &nrChannels, 0);
 	
 	glGenTextures(1, &id);
@@ -37,12 +38,12 @@ Texture::Texture(const std::string& filepath)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	stbi_image_free(data);
 
-	list.push_back(this);
+	map[key] = this;
 }
 Texture::~Texture()
 {
 	glDeleteTextures(1, &id);
-	list.erase(std::remove(list.begin(), list.end(), this), list.end());
+	map.erase(key);
 }
 
 void Texture::SetTextureUnit(GLenum unit)
@@ -52,12 +53,19 @@ void Texture::SetTextureUnit(GLenum unit)
 }
 void Texture::GenerateDefaultTexture()
 {
-	Texture::defaultTexture = new Texture();
+	if (defaultTexture != nullptr)
+	{
+		std::cout << "Default texture already initialized!\n";
+		return;
+	}
+
+	defaultTexture = new Texture();
 }
 
 Texture::Texture()
 {
 	filename = "default";
+	key = filename;
 	format = FileFormat::PNG;
 
 	data = new unsigned char[4];
@@ -80,5 +88,5 @@ Texture::Texture()
 	glBindTexture(GL_TEXTURE_2D, 0);
 	free(data);
 
-	list.push_back(this);
+	map[key] = this;
 }
